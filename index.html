@@ -314,7 +314,7 @@ d3.json("RentalHousing.json", function(data) {
               dashName = toTitleCase(d.value[2]).split(" ").join("-");
               searchstring = "http://affordablehousingonline.com/housing-search/" + dashName + "/";
               console.log(searchstring)
-              link.html('<a href= "http://affordablehousingonline.com/housing-search/" + dashName + "/"><span class="glyphicon glyphicon-link"></span></a>')
+              link.html('<a href=searchstring><span class="glyphicon glyphicon-link"></span></a>')
                 .style('left', tooltip_pos.left + tooltip_width + 16 + 'px') 
                 .style('top', tooltip_pos.top + 30 + 'px')
               tooltip_hide = true;
