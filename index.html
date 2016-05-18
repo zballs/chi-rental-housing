@@ -49,14 +49,31 @@ html, body, #map {
   box-shadow: 1px 1px 2px black;
 }
 
+.xout {
+  border-radius: 20px;
+  background: transparent;
+  color: black;
+  text-shadow: 2px 2px 4px lightgray;
+  -webkit-font-smoothing: antialiased;
+  position: absolute;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: sans-serif;
+}
+
+.xout:hover {
+  cursor: pointer;
+}
+
 .infobox {
+  margin: auto;
   position: absolute;
   color: white;
   background: black;
-  text-align: left;
-  width: 300px;
+  width: 220px;
+  height: 60px;
   border-radius: 4px;
-  padding: 4px;
+  padding: 4px 6px;
   font-size: 12px;
   font-family: sans-serif;
   box-shadow: 1px 1px 2px black;
@@ -153,20 +170,29 @@ var showThisType = thisType.options[thisType.selectedIndex].value;
 
 // Initialize variables...
 var marker, circles, name, substr="", tooltip_hide, radius=4, 
-opacity=0.6, high_opacity=1, resizeTime=400, flashTime=100, 
-tooltipTime=50;
+opacity=0.6, high_opacity=1,tooltip_opacity=0.8, resizeTime=400, flashTime=100, 
+tooltipTime=50, tooltip_pos, tooltip_width, xout_width;
 
 var tooltip = d3.select("body").append("div")
   .attr("class","tooltip")
   .style("opacity",0);
-
+  
+var xout = d3.select("body").append("div")
+  .attr("class","xout")
+  .style("opacity",0)
+  .html('<span class="glyphicon glyphicon-remove"></span>')
+  .on('click', function(){
+    tooltip.style("opacity", 0);
+    tooltip.html("");
+    xout.style("opacity", 0);
+  });
 
 var infobox = d3.select("body").append("div")
   .attr("class","infobox")
   .style("opacity",0)
   .style('left', pos.left + 'px')
   .style('top', pos.top + 30 + 'px')
-infobox.html('<p>For information on other rental properties in Chicago and Illinois, click this link or call (877) 428-8844</p>')
+infobox.html('<p>For information on other rental properties in Chicago and Illinois, follow this link or call (877) 428-8844</p>')
 
 // Create the Google Map...
 var map = new google.maps.Map(d3.select("#map").node(), {
@@ -251,24 +277,33 @@ d3.json("RentalHousing.json", function(data) {
           .on("click", function(d) {
             if (d.value[1] == showThisType || showThisType == 'ALL') {
               tooltip.transition().duration(tooltipTime)
-                .style("opacity", high_opacity);
+                .style("opacity", tooltip_opacity);
               tooltip.html('<span class="glyphicon glyphicon-home"></span>&nbsp&nbsp' + d.value[2] + '<br>' + '<span class="glyphicon glyphicon-info-sign"></span>&nbsp&nbsp' + d.value[0] + ', ' + d.value[7] + ' units' + '<br>' + '<span class="glyphicon glyphicon-map-marker"></span>&nbsp&nbsp' + d.value[3] + ', ' + d.value[4] + '<br>' + '<span class="glyphicon glyphicon-phone"></span>&nbsp&nbsp' + d.value[5])
                 .style('left', (d3.event.pageX) + 'px')
                 .style('top', (d3.event.pageY) + 'px')
+              tooltip_pos = $('.tooltip').offset();
+              tooltip_width = $('.tooltip').width();
+              xout_width = $('.xout').width();
+              xout.transition().duration(tooltipTime)
+                .style("opacity", tooltip_opacity);
+              xout.html('<span class="glyphicon glyphicon-remove"></span>')
+                .style('left', tooltip_pos.left + tooltip_width + 1.5 * xout_width + 'px') 
+                .style('top', tooltip_pos.top + 'px'); 
               tooltip_hide = true;
             }
           });
           
           layer.on("click", function() {
             if (tooltip_hide) {
-              tooltip
-                .style("opacity", 0);
+              tooltip.style("opacity", 0);
+              xout.style("opacity", 0);
             }
           });
           
           map.addListener("bounds_changed", function(){
             tooltip.style("opacity", 0);
             tooltip.html("");
+            xout.style("opacity", 0);
           })
           
       circles = layer.selectAll(".marker");
@@ -282,9 +317,9 @@ d3.json("RentalHousing.json", function(data) {
       };
       
       function updateSelection(object, newType) {
-        tooltip.transition().duration(tooltipTime)
         tooltip.style("opacity", 0);
         tooltip.html("");
+        xout.style("opacity", 0);
         thisType = document.getElementById("type");
         showThisType = thisType.options[thisType.selectedIndex].value;
         circles 
@@ -298,9 +333,9 @@ d3.json("RentalHousing.json", function(data) {
       };
       
       $('#search').on('input', function() {
-        tooltip.transition().duration(resizeTime)
         tooltip.style("opacity", 0);
         tooltip.html("");
+        xout.style("opacity", 0);
         substr = $(this).val().toUpperCase();
         userSearch(substr);
       });
