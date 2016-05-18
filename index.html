@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <link data-require="bootstrap-css@3.3.6" data-semver="3.3.6" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css" />
+    <style>
+
+html, body, #map {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  background: lightgray;
+}
+
+.marker {
+  fill: #f03b20;
+  stroke-width: 0.1px;
+}
+
+.rental_housing {
+}
+
+#type {
+    background-color: #4C4CFF;
+    color: white;
+    padding: 12px 8px;
+    font-family: sans-serif;
+    border: 1px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 1px 1px 2px darkgray;
+    margin-left: 12px;
+}
+
+.tooltip {
+  position: absolute;
+  color: white;
+  background: black;
+  text-align: left;
+  border-radius: 1px 3px 3px 3px;
+  padding: 6px;
+  font-size: 11px;
+  font-family: sans-serif;
+  box-shadow: 1px 1px 2px black;
+}
+
+.infobox {
+  position: absolute;
+  color: white;
+  background: black;
+  text-align: left;
+  width: 300px;
+  border-radius: 4px;
+  padding: 4px;
+  font-size: 12px;
+  font-family: sans-serif;
+  box-shadow: 1px 1px 2px black;
+}
+
+::-webkit-input-placeholder {
+   color: #d9d9d9;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+   color: #d9d9d9;
+}
+::-moz-placeholder {  /* Firefox 19+ */
+   color: #d9d9d9;
+}
+
+:-ms-input-placeholder {  
+   color: #d9d9d9;
+} 
+
+.search {
+  display: inline-block;
+  text-shadow: 1px 1px 2px lightgray;
+  background-color: transparent;
+  color: black;
+  padding: 12px;
+  font-size: 16px;
+  font-family: sans-serif;
+}
+
+#search {
+  font-size: 14px;
+  height: 40px;
+  width: 210px;
+  padding: 6px;
+  border: 2px;
+  border-radius: 2px;
+  box-shadow: 1px 1px 2px darkgray;
+}
+
+.btn {
+  color: black;
+}
+
+.btn:hover {
+  color: dodgerblue;
+}
+
+    </style>
+  </head>
+
+  <body>
+    <select id="type">
+      <option class="option" value="ALL">All Developments</option>
+      <option value="ARO">ARO</option>
+      <option value="INTER-GENERATIONAL">Inter-Generational</option>
+      <option value="MULTIFAMILY">Multifamily</option>
+      <option value="MULTIFAMILY/ARTISTS">Multifamily/Artists</option>
+      <option value="PEOPLE WITH DISABILITIES">People with Disabilities</option>
+      <option value="SENIOR">Senior</option>
+      <option value="SENIOR HUD 202">HUD 202</option>
+      <option value="SENIOR LGBTQ">Senior LGBTQ</option>
+      <option value="SUPPORTIVE">Supportive</option>
+      <option value="SUPPORTIVE/HIV/AIDS">HIV/AIDS</option>
+      <option value="SUPPORTIVE/KINSHIP FAMILIES">Kinship Families</option>
+      <option value="SUPPORTIVE/MALES 18-24YRS.">Males 18-24</option>
+      <option value="SUPPORTIVE/VETERANS">Veteran</option>
+    </select>
+    <form class="search">
+      <input id="search" type="text" placeholder="Name/Address/Neighborhood" />
+    </form>
+    <a class="btn" href="http://www.ILHousingSearch.org">
+      www.ILHousingSearch.org
+    </a>
+    <div id="map"></div>
+    <div id="marker-tooltip"></div>
+    <script src="//maps.google.com/maps/api/js?sensor=true"></script>
+    <script src="//d3js.org/d3.v3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+    <script>
+
+function changeType(object, func) {
+  d3.select('#type')
+    .on('change', function() {
+      var newType = d3.select(this).property('value');
+      func(object,newType);
+    });
+};
+
+var pos = $('.btn').offset();
+
+var thisType = document.getElementById("type");
+var showThisType = thisType.options[thisType.selectedIndex].value;
+
+// Initialize variables...
+var marker, circles, name, substr="", tooltip_hide, radius=4, 
+opacity=0.6, high_opacity=1, resizeTime=400, flashTime=100, 
+tooltipTime=50;
+
+var tooltip = d3.select("body").append("div")
+  .attr("class","tooltip")
+  .style("opacity",0);
+
+
+var infobox = d3.select("body").append("div")
+  .attr("class","infobox")
+  .style("opacity",0)
+  .style('left', pos.left + 'px')
+  .style('top', pos.top + 30 + 'px')
+infobox.html('<p>For information on other rental properties in Chicago and Illinois, click this link or call (877) 428-8844</p>')
+
+// Create the Google Map...
+var map = new google.maps.Map(d3.select("#map").node(), {
+  zoom: 8,
+  center: new google.maps.LatLng(41.862606,-87.695794),
+  mapTypeId: google.maps.MapTypeId.ROADMAP,
+  styles: [{
+    stylers: [{
+      saturation: -100
+    }]
+  }]
+});
+
+
+map.setOptions({draggableCursor: ''});
+
+// Load the rental housing data. When data comes back, create an overlay.
+d3.json("RentalHousing.json", function(data) {
+  var bounds = new google.maps.LatLngBounds();
+  d3.entries(data).forEach(function(d) {
+    bounds.extend(d.value.lat_lng = new google.maps.LatLng(d.value[8], d.value[9]));
+  });
+  map.fitBounds(bounds);
+  var overlay = new google.maps.OverlayView(),
+  padding = 20;
+  
+  // Add the container when the overlay is added to the map.
+  overlay.onAdd = function() {
+    var layer = d3.select(this.getPanes().overlayMouseTarget).append("svg")
+      .attr("class", "rental_housing");
+      
+      // Draw each marker as a separate SVG element.
+      // We could use a single SVG, but what size would it have?
+      overlay.draw = function() {
+        tooltip_hide = false;
+        var projection = this.getProjection(),
+        sw = projection.fromLatLngToDivPixel(bounds.getSouthWest()),
+        ne = projection.fromLatLngToDivPixel(bounds.getNorthEast());
+        sw.x -= padding;
+        sw.y += padding;
+        ne.x += padding;
+        ne.y -= padding;
+        
+        d3.select('.rental_housing')
+          .attr('width', (ne.x - sw.x) + 'px')
+          .attr('height', (sw.y - ne.y) + 'px')
+          .style('position', 'absolute')
+          .style('left', sw.x + 'px')
+          .style('top', ne.y + 'px');
+          
+        marker = layer.selectAll(".marker")
+          .data(d3.entries(data))
+          .each(transform)
+          .enter()
+          .append("circle")
+          .each(transform)
+          .attr("class", "marker")
+          .attr("r", radius)
+          .style("fill-opacity", opacity)
+          .attr('cx', function(d) {
+            d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+            return d.x-sw.x;
+          })
+          .attr('cy', function(d) {
+            d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+            return d.y-ne.y
+          })
+          .on("mouseover", function(d) {
+            if (d.value[1] == showThisType || showThisType == 'ALL') {
+              d3.select(this).transition().duration(flashTime)
+                .style("fill-opacity", high_opacity);
+              d3.select("svg").style("cursor","crosshair");
+            }
+          })
+          .on("mouseout", function(d) {
+            if (d.value[1] == showThisType || showThisType == 'ALL') {            
+              d3.select(this).transition().duration(flashTime)
+                .style("fill-opacity", opacity);
+              d3.select("svg").style("cursor",'');
+            }
+          })
+          .on("click", function(d) {
+            if (d.value[1] == showThisType || showThisType == 'ALL') {
+              tooltip.transition().duration(tooltipTime)
+                .style("opacity", high_opacity);
+              tooltip.html('<span class="glyphicon glyphicon-home"></span>&nbsp&nbsp' + d.value[2] + '<br>' + '<span class="glyphicon glyphicon-info-sign"></span>&nbsp&nbsp' + d.value[0] + ', ' + d.value[7] + ' units' + '<br>' + '<span class="glyphicon glyphicon-map-marker"></span>&nbsp&nbsp' + d.value[3] + ', ' + d.value[4] + '<br>' + '<span class="glyphicon glyphicon-phone"></span>&nbsp&nbsp' + d.value[5])
+                .style('left', (d3.event.pageX) + 'px')
+                .style('top', (d3.event.pageY) + 'px')
+              tooltip_hide = true;
+            }
+          });
+          
+          layer.on("click", function() {
+            if (tooltip_hide) {
+              tooltip
+                .style("opacity", 0);
+            }
+          });
+          
+          map.addListener("bounds_changed", function(){
+            tooltip.style("opacity", 0);
+            tooltip.html("");
+          })
+          
+      circles = layer.selectAll(".marker");
+      changeType(circles, updateSelection);
+      
+      function transform(d) {
+        d = projection.fromLatLngToDivPixel(d.value.lat_lng);
+        return d3.select(this)
+          .attr('cx', d.x - sw.x)
+          .attr('cy', d.y - ne.y);
+      };
+      
+      function updateSelection(object, newType) {
+        tooltip.transition().duration(tooltipTime)
+        tooltip.style("opacity", 0);
+        tooltip.html("");
+        thisType = document.getElementById("type");
+        showThisType = thisType.options[thisType.selectedIndex].value;
+        circles 
+          .filter(function(d) { return (d.value[1] == showThisType || showThisType == 'ALL'); })
+          .transition().duration(resizeTime).ease("linear")
+          .attr("r", radius);
+        circles 
+          .filter(function(d) { return (d.value[1] != showThisType && showThisType != 'ALL'); })
+          .transition().duration(resizeTime).ease("linear")
+          .attr("r",0);
+      };
+      
+      $('#search').on('input', function() {
+        tooltip.transition().duration(resizeTime)
+        tooltip.style("opacity", 0);
+        tooltip.html("");
+        substr = $(this).val().toUpperCase();
+        userSearch(substr);
+      });
+      
+      $('.btn').on('mouseover', function() {
+        infobox.transition().duration(200);
+        infobox.style("opacity",0.8);
+      })
+      
+      $('.btn').on('mouseout', function() {
+        infobox.transition().duration(200);
+        infobox.style("opacity",0);
+      })
+      
+      function userSearch(subString) {
+        circles
+          .filter(function(d) { return (d.value[1] == showThisType || showThisType == 'ALL'); })
+          .filter(function(d) { neighborhood = d.value[0], name = d.value[2], address = d.value[3]; 
+            return (neighborhood.search(subString) != -1 || name.search(subString) != -1 || address.search(subString) != -1); })
+          .transition().duration(resizeTime).ease("linear")
+          .attr("r",radius);
+        circles
+          .filter(function(d) { return (d.value[1] == showThisType || showThisType == 'ALL'); })
+          .filter(function(d) { neighborhood = d.value[0], name = d.value[2], address = d.value[3];
+            return (neighborhood.search(subString) == -1 && name.search(subString) == -1 && address.search(subString) == -1); }) 
+          .transition().duration(resizeTime).ease("linear")
+          .attr("r",0);
+      }
+    };
+  };
+  // Bind our overlay to the map...
+  overlay.setMap(map);
+});
+    </script>
+  </body>
+
+</html>
