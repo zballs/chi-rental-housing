@@ -61,6 +61,18 @@ html, body, #map {
   font-family: sans-serif;
 }
 
+.link {
+  border-radius: 20px;
+  background: transparent;
+  color: black;
+  text-shadow: 2px 2px 4px lightgray;
+  -webkit-font-smoothing: antialiased;
+  position: absolute;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: sans-serif;
+}
+
 .xout:hover {
   cursor: pointer;
 }
@@ -163,6 +175,10 @@ function changeType(object, func) {
     });
 };
 
+function toTitleCase(str) {
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
+
 var pos = $('.btn').offset();
 
 var thisType = document.getElementById("type");
@@ -186,6 +202,10 @@ var xout = d3.select("body").append("div")
     tooltip.html("");
     xout.style("opacity", 0);
   });
+
+var link = d3.select("body").append("div")
+  .attr("class", "link")
+  .style("opacity", 0);
 
 var infobox = d3.select("body").append("div")
   .attr("class","infobox")
@@ -228,6 +248,7 @@ d3.json("RentalHousing.json", function(data) {
       // We could use a single SVG, but what size would it have?
       overlay.draw = function() {
         tooltip_hide = false;
+        
         var projection = this.getProjection(),
         sw = projection.fromLatLngToDivPixel(bounds.getSouthWest()),
         ne = projection.fromLatLngToDivPixel(bounds.getNorthEast());
@@ -283,12 +304,19 @@ d3.json("RentalHousing.json", function(data) {
                 .style('top', (d3.event.pageY) + 'px')
               tooltip_pos = $('.tooltip').offset();
               tooltip_width = $('.tooltip').width();
-              xout_width = $('.xout').width();
               xout.transition().duration(tooltipTime)
                 .style("opacity", tooltip_opacity);
               xout.html('<span class="glyphicon glyphicon-remove"></span>')
-                .style('left', tooltip_pos.left + tooltip_width + 1.5 * xout_width + 'px') 
-                .style('top', tooltip_pos.top + 'px'); 
+                .style('left', tooltip_pos.left + tooltip_width + 16 + 'px') 
+                .style('top', tooltip_pos.top + 'px')
+              link.transition().duration(tooltipTime)
+                .style("opacity", tooltip_opacity);
+              dashName = toTitleCase(d.value[2]).split(" ").join("-");
+              searchstring = "http://affordablehousingonline.com/housing-search/" + dashName + "/";
+              console.log(searchstring)
+              link.html('<a href= "http://affordablehousingonline.com/housing-search/" + dashName + "/"><span class="glyphicon glyphicon-link"></span></a>')
+                .style('left', tooltip_pos.left + tooltip_width + 16 + 'px') 
+                .style('top', tooltip_pos.top + 30 + 'px')
               tooltip_hide = true;
             }
           });
@@ -297,6 +325,7 @@ d3.json("RentalHousing.json", function(data) {
             if (tooltip_hide) {
               tooltip.style("opacity", 0);
               xout.style("opacity", 0);
+              link.style("opacity",0);
             }
           });
           
@@ -304,6 +333,9 @@ d3.json("RentalHousing.json", function(data) {
             tooltip.style("opacity", 0);
             tooltip.html("");
             xout.style("opacity", 0);
+            xout.html("");
+            link.style("opacity",0);
+            link.html("");
           })
           
       circles = layer.selectAll(".marker");
@@ -320,6 +352,9 @@ d3.json("RentalHousing.json", function(data) {
         tooltip.style("opacity", 0);
         tooltip.html("");
         xout.style("opacity", 0);
+        xout.html("");
+        link.style("opacity",0);
+        link.html("");
         thisType = document.getElementById("type");
         showThisType = thisType.options[thisType.selectedIndex].value;
         circles 
@@ -336,6 +371,9 @@ d3.json("RentalHousing.json", function(data) {
         tooltip.style("opacity", 0);
         tooltip.html("");
         xout.style("opacity", 0);
+        xout.html("");
+        link.style("opacity",0);
+        link.html("");
         substr = $(this).val().toUpperCase();
         userSearch(substr);
       });
