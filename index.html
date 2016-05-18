@@ -313,10 +313,10 @@ d3.json("RentalHousing.json", function(data) {
                 .style("opacity", tooltip_opacity);
               dashName = toTitleCase(d.value[2]).split(" ").join("-");
               searchstring = "http://affordablehousingonline.com/housing-search/" + dashName + "/";
-              console.log(searchstring)
-              link.html('<a href=searchstring><span class="glyphicon glyphicon-link"></span></a>')
+              link.html('<a id="link"><span class="glyphicon glyphicon-link"></span></a>')
                 .style('left', tooltip_pos.left + tooltip_width + 16 + 'px') 
-                .style('top', tooltip_pos.top + 30 + 'px')
+                .style('top', tooltip_pos.top + 30 + 'px');
+              document.getElementById("link").setAttribute("href",searchstring);
               tooltip_hide = true;
             }
           });
