@@ -61,22 +61,6 @@ html, body, #map {
   font-family: sans-serif;
 }
 
-.link {
-  border-radius: 20px;
-  background: transparent;
-  color: black;
-  text-shadow: 2px 2px 4px lightgray;
-  -webkit-font-smoothing: antialiased;
-  position: absolute;
-  font-size: 12px;
-  font-weight: bold;
-  font-family: sans-serif;
-}
-
-#link {
-  color: black;
-}
-
 .xout:hover {
   cursor: pointer;
 }
@@ -161,8 +145,8 @@ html, body, #map {
     <form class="search">
       <input id="search" type="text" placeholder="Name/Address/Neighborhood" />
     </form>
-    <a class="btn" href="http://www.ILHousingSearch.org">
-      www.ILHousingSearch.org
+    <a class="btn ILHousingSearch" href="http://www.ILHousingSearch.org" target="_blank">
+      ILHousingSearch.org
     </a>
     <div id="map"></div>
     <div id="marker-tooltip"></div>
@@ -202,14 +186,9 @@ var xout = d3.select("body").append("div")
   .style("opacity",0)
   .html('<span class="glyphicon glyphicon-remove"></span>')
   .on('click', function(){
-    tooltip.style("opacity", 0);
-    tooltip.html("");
-    xout.style("opacity", 0);
+    tooltip.attr("class",null);
+    xout.attr("class",null);
   });
-
-var link = d3.select("body").append("div")
-  .attr("class", "link")
-  .style("opacity", 0);
 
 var infobox = d3.select("body").append("div")
   .attr("class","infobox")
@@ -302,44 +281,30 @@ d3.json("RentalHousing.json", function(data) {
           .on("click", function(d) {
             if (d.value[1] == showThisType || showThisType == 'ALL') {
               tooltip.transition().duration(tooltipTime)
-                .style("opacity", tooltip_opacity);
+                .style("opacity", tooltip_opacity)
+                .attr("class","tooltip");
               tooltip.html('<span class="glyphicon glyphicon-home"></span>&nbsp&nbsp' + d.value[2] + '<br>' + '<span class="glyphicon glyphicon-info-sign"></span>&nbsp&nbsp' + d.value[0] + ', ' + d.value[7] + ' units' + '<br>' + '<span class="glyphicon glyphicon-map-marker"></span>&nbsp&nbsp' + d.value[3] + ', ' + d.value[4] + '<br>' + '<span class="glyphicon glyphicon-phone"></span>&nbsp&nbsp' + d.value[5])
-                .style('left', (d3.event.pageX) + 'px')
-                .style('top', (d3.event.pageY) + 'px')
-              tooltip_pos = $('.tooltip').offset();
-              tooltip_width = $('.tooltip').width();
+                .style('left', (d3.event.pageX) + 6 + 'px')
+                .style('top', (d3.event.pageY) + 3 + 'px');
               xout.transition().duration(tooltipTime)
-                .style("opacity", tooltip_opacity);
-              xout.html('<span class="glyphicon glyphicon-remove"></span>')
-                .style('left', tooltip_pos.left + tooltip_width + 16 + 'px') 
-                .style('top', tooltip_pos.top + 'px')
-              link.transition().duration(tooltipTime)
-                .style("opacity", tooltip_opacity);
-              dashName = toTitleCase(d.value[2]).split(" ").join("-");
-              searchstring = "http://affordablehousingonline.com/housing-search/" + dashName + "/";
-              link.html('<a id="link"><span class="glyphicon glyphicon-link"></span></a>')
-                .style('left', tooltip_pos.left + tooltip_width + 16 + 'px') 
-                .style('top', tooltip_pos.top + 20 + 'px');
-              document.getElementById("link").setAttribute("href",searchstring);
+                .attr("class","xout")
+                .style("opacity", tooltip_opacity)
+                .style('left', (d3.event.pageX) - 7 + 'px') 
+                .style('top', (d3.event.pageY) - 7 + 'px');
               tooltip_hide = true;
             }
           });
           
           layer.on("click", function() {
             if (tooltip_hide) {
-              tooltip.style("opacity", 0);
-              xout.style("opacity", 0);
-              link.style("opacity",0);
+              tooltip.attr("class",null);
+            xout.attr("class",null);
             }
           });
           
           map.addListener("bounds_changed", function(){
-            tooltip.style("opacity", 0);
-            tooltip.html("");
-            xout.style("opacity", 0);
-            xout.html("");
-            link.style("opacity",0);
-            link.html("");
+            tooltip.attr("class",null);
+            xout.attr("class",null);
           })
           
       circles = layer.selectAll(".marker");
@@ -353,12 +318,8 @@ d3.json("RentalHousing.json", function(data) {
       };
       
       function updateSelection(object, newType) {
-        tooltip.style("opacity", 0);
-        tooltip.html("");
-        xout.style("opacity", 0);
-        xout.html("");
-        link.style("opacity",0);
-        link.html("");
+        tooltip.attr("class",null);
+        xout.attr("class",null);
         thisType = document.getElementById("type");
         showThisType = thisType.options[thisType.selectedIndex].value;
         circles 
@@ -369,15 +330,13 @@ d3.json("RentalHousing.json", function(data) {
           .filter(function(d) { return (d.value[1] != showThisType && showThisType != 'ALL'); })
           .transition().duration(resizeTime).ease("linear")
           .attr("r",0);
+        substr = $('#search').val().toUpperCase();
+        userSearch(substr);
       };
       
       $('#search').on('input', function() {
-        tooltip.style("opacity", 0);
-        tooltip.html("");
-        xout.style("opacity", 0);
-        xout.html("");
-        link.style("opacity",0);
-        link.html("");
+        tooltip.attr("class",null);
+        xout.attr("class",null);
         substr = $(this).val().toUpperCase();
         userSearch(substr);
       });
