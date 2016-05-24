@@ -7,6 +7,10 @@ html, body, #map {
   background: lightgray;
 }
 
+#title {
+    font-size: 150%;
+}
+
 .marker {
   fill: #f03b20;
   stroke-width: 0.1px;
