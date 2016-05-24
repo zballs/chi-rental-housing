@@ -7,8 +7,18 @@ html, body, #map {
   background: lightgray;
 }
 
+#top-bar {
+    height: 64px;
+}
+
 #title {
     font-size: 150%;
+}
+
+#map {
+    height: -o-calc(100% - 64px); /* opera */
+    height: -webkit-calc(100% - 64px); /* google, safari */
+    height: -moz-calc(100% - 64px); /* firefox */
 }
 
 .marker {
