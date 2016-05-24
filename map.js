@@ -127,13 +127,17 @@ d3.json("RentalHousing.json", function(data) {
                 .style("opacity", tooltip_opacity)
                 .attr("class","tooltip");
               tooltip.html('<span class="glyphicon glyphicon-home"></span>&nbsp&nbsp' + d.value[2] + '<br>' + '<span class="glyphicon glyphicon-info-sign"></span>&nbsp&nbsp' + d.value[0] + ', ' + d.value[7] + ' units' + '<br>' + '<span class="glyphicon glyphicon-map-marker"></span>&nbsp&nbsp' + d.value[3] + ', ' + d.value[4] + '<br>' + '<span class="glyphicon glyphicon-phone"></span>&nbsp&nbsp' + d.value[5])
-                .style('left', (d3.event.pageX) + 6 + 'px')
-                .style('top', (d3.event.pageY) + 3 + 'px');
+                .style('left', $(this).position().left - 10 + 'px')
+                .style('top', $(this).position().top - 10 + 'px');
+                // .style('left', (d3.event.pageX) + 6 + 'px')
+                // .style('top', (d3.event.pageY) + 3 + 'px');
               xout.transition().duration(tooltipTime)
                 .attr("class","xout")
                 .style("opacity", tooltip_opacity)
-                .style('left', (d3.event.pageX) - 7 + 'px')
-                .style('top', (d3.event.pageY) - 7 + 'px');
+                .style('left', $(this).position().left - 2 + 'px')
+                .style('top', $(this).position().top - 2 + 'px');
+                // .style('left', (d3.event.pageX) - 7 + 'px')
+                // .style('top', (d3.event.pageY) - 7 + 'px');
               tooltip_hide = true;
             }
           });
