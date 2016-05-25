@@ -63,7 +63,7 @@ d3.json("RentalHousing.json", function(data) {
   });
   map.fitBounds(bounds);
   var overlay = new google.maps.OverlayView(),
-  padding = 20;
+  padding = 10;
 
   // Add the container when the overlay is added to the map.
   overlay.onAdd = function() {
