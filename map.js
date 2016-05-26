@@ -29,8 +29,8 @@ var xout = d3.select("body").append("div")
   .style("opacity",0)
   .html('<span class="glyphicon glyphicon-remove"></span>')
   .on('click', function(){
-    tooltip.attr("class",null);
-    xout.attr("class",null);
+    tooltip.attr("class","hiddenDiv");
+    xout.attr("class","hiddenDiv");
   });
 
 var infobox = d3.select("body").append("div")
@@ -63,7 +63,7 @@ d3.json("RentalHousing.json", function(data) {
   });
   map.fitBounds(bounds);
   var overlay = new google.maps.OverlayView(),
-  padding = 20;
+  padding = 10;
 
   // Add the container when the overlay is added to the map.
   overlay.onAdd = function() {
@@ -144,14 +144,14 @@ d3.json("RentalHousing.json", function(data) {
 
           layer.on("click", function() {
             if (tooltip_hide) {
-              tooltip.attr("class",null);
-            xout.attr("class",null);
+              tooltip.attr("class","hiddenDiv");
+              xout.attr("class","hiddenDiv");
             }
           });
 
           map.addListener("bounds_changed", function(){
-            tooltip.attr("class",null);
-            xout.attr("class",null);
+            tooltip.attr("class","hiddenDiv");
+            xout.attr("class","hiddenDiv");
           })
 
       circles = layer.selectAll(".marker");
@@ -165,8 +165,8 @@ d3.json("RentalHousing.json", function(data) {
       };
 
       function updateSelection(object, newType) {
-        tooltip.attr("class",null);
-        xout.attr("class",null);
+        tooltip.attr("class","hiddenDiv");
+        xout.attr("class","hiddenDiv");
         thisType = document.getElementById("type");
         showThisType = thisType.options[thisType.selectedIndex].value;
         circles
@@ -182,8 +182,8 @@ d3.json("RentalHousing.json", function(data) {
       };
 
       $('#search').on('input', function() {
-        tooltip.attr("class",null);
-        xout.attr("class",null);
+        tooltip.attr("class","hiddenDiv");
+        xout.attr("class","hiddenDiv");
         substr = $(this).val().toUpperCase();
         userSearch(substr);
       });
