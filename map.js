@@ -132,6 +132,7 @@ d3.json("RentalHousing.json", function(data) {
                 // .style('left', (d3.event.pageX) + 6 + 'px')
                 // .style('top', (d3.event.pageY) + 3 + 'px');
               xout.transition().duration(tooltipTime)
+                .html('<span class="glyphicon glyphicon-remove"></span>')
                 .attr("class","xout")
                 .style("opacity", tooltip_opacity)
                 .style('left', $(this).position().left - 2 + 'px')
@@ -144,14 +145,14 @@ d3.json("RentalHousing.json", function(data) {
 
           layer.on("click", function() {
             if (tooltip_hide) {
-              tooltip.attr("class",null);
-            xout.attr("class",null);
+              tooltip.attr("class",null).html("");
+              xout.attr("class",null).html("");
             }
           });
 
           map.addListener("bounds_changed", function(){
-            tooltip.attr("class",null);
-            xout.attr("class",null);
+            tooltip.attr("class",null).html("");
+              xout.attr("class",null).html("");
           })
 
       circles = layer.selectAll(".marker");
@@ -165,8 +166,8 @@ d3.json("RentalHousing.json", function(data) {
       };
 
       function updateSelection(object, newType) {
-        tooltip.attr("class",null);
-        xout.attr("class",null);
+        tooltip.attr("class",null).html("");
+        xout.attr("class",null).html("");
         thisType = document.getElementById("type");
         showThisType = thisType.options[thisType.selectedIndex].value;
         circles
@@ -182,8 +183,8 @@ d3.json("RentalHousing.json", function(data) {
       };
 
       $('#search').on('input', function() {
-        tooltip.attr("class",null);
-        xout.attr("class",null);
+        tooltip.attr("class",null).html("");
+        xout.attr("class",null).html("");
         substr = $(this).val().toUpperCase();
         userSearch(substr);
       });
