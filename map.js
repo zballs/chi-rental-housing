@@ -132,7 +132,6 @@ d3.json("RentalHousing.json", function(data) {
                 // .style('left', (d3.event.pageX) + 6 + 'px')
                 // .style('top', (d3.event.pageY) + 3 + 'px');
               xout.transition().duration(tooltipTime)
-                .html('<span class="glyphicon glyphicon-remove"></span>')
                 .attr("class","xout")
                 .style("opacity", tooltip_opacity)
                 .style('left', $(this).position().left - 2 + 'px')
@@ -152,7 +151,7 @@ d3.json("RentalHousing.json", function(data) {
 
           map.addListener("bounds_changed", function(){
             tooltip.attr("class","hiddenDiv");
-              xout.attr("class","hiddenDiv");
+            xout.attr("class","hiddenDiv");
           })
 
       circles = layer.selectAll(".marker");
